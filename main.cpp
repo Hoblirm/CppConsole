@@ -7,10 +7,11 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string>
+#include <string.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
