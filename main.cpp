@@ -58,7 +58,7 @@ int compile() {
     backup_file(sProjMainPath);
     copy(sMainPath, sProjMainPath);
 
-    int output = system("make --silent");
+    int output = system("make --silent 2>&1 | grep -v warning:");
 
     rollback_file(sProjMainPath);
 

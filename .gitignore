@@ -2,3 +2,5 @@
 build
 dist
 nbproject
+cppconsole
+CppConsole-Makefile.mk
