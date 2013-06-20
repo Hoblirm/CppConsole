@@ -41,11 +41,11 @@ void copy(string from, string to) {
 }
 
 void backup_file(string filename) {
-  rename(filename.c_str(),(filename+".bak").c_str());
+  rename(filename.c_str(), (filename + ".bak").c_str());
 }
 
 void rollback_file(string filename) {
-  rename((filename+".bak").c_str(),filename.c_str());
+  rename((filename + ".bak").c_str(), filename.c_str());
 }
 
 int compile() {
@@ -56,9 +56,9 @@ int compile() {
   } else {
 
     backup_file(sProjMainPath);
-    copy(sMainPath,sProjMainPath);
+    copy(sMainPath, sProjMainPath);
 
-    int output = system("make");
+    int output = system("make --silent");
 
     rollback_file(sProjMainPath);
 
@@ -97,7 +97,7 @@ int execute(ostringstream* codeStream) {
   output = compile();
   if (output == 0) {
     char full_path[256];
-    realpath(sExecPath.c_str(),full_path);
+    realpath(sExecPath.c_str(), full_path);
     system(full_path);
   } else {
     rollback_file(sMainPath);
@@ -157,15 +157,13 @@ void execute_code_buffer() {
 }
 
 void add_code(string str) {
-  if (str[str.length()-1] == '{') sBraceCount++;
-  else if ((sBraceCount>0)&&(str[str.length()-1] == '}')) sBraceCount--;
+  if (str[str.length() - 1] == '{') sBraceCount++;
+  else if ((sBraceCount > 0) && (str[str.length() - 1] == '}')) sBraceCount--;
 
   sCodeBuffer << str << "\n";
 
   if (sBraceCount == 0) execute_code_buffer();
 }
-
-
 
 int set_parameters(int argc, char** argv) {
   int success = 0;
@@ -174,9 +172,9 @@ int set_parameters(int argc, char** argv) {
     sProjMainPath = string(argv[1]);
 
     for (int i = 2; i < argc; i += 2) {
-      if (argv[i] == "-m") {
+      if (string(argv[i]) == "-m") {
         sMakeDir = argv[i + 1];
-      } else if (argv[i] == "-e") {
+      } else if (string(argv[i]) == "-e") {
         sExecPath = argv[i + 1];
       } else {
         cout << "Flag of '" << argv[i] << "' is invalid.\n";
@@ -190,7 +188,6 @@ int set_parameters(int argc, char** argv) {
 }
 
 void clean_files() {
-
   string cmd;
   cmd = string("rm -rf " + sMainPath);
 
@@ -202,6 +199,16 @@ void clean_files() {
   }
 }
 
+void print_console_prefix() {
+  string brace_str;
+  if (sBraceCount == 0) brace_str = ":";
+  for (int i = 0; i < sBraceCount; i++) {
+    brace_str += "{";
+  }
+
+  cout << "CppConsole" << brace_str << ">";
+}
+
 /*
  *
  */
@@ -211,14 +218,8 @@ int main(int argc, char** argv) {
 
     string input_str;
     while (input_str != "exit") {
+      print_console_prefix();
 
-      string brace_str;
-      if (sBraceCount == 0) brace_str = ":";
-      for (int i=0;i<sBraceCount;i++){
-        brace_str += "{";
-      }
-
-      cout << "CppConsole" << brace_str << ">";
       getline(cin, input_str);
 
       if (input_str == "") {
