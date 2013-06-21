@@ -2,7 +2,7 @@
 // Name        : CppConsole.cpp
 // Author      : Richard Hoblitzell
 // Version     : 0.0.1
-// Description : Console Application for C++ to dynamic execute code.
+// Description : Console Application for C++ to dynamically execute code.
 //============================================================================
 #include <sys/stat.h>
 #include <stdlib.h>
