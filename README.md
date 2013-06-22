@@ -14,52 +14,66 @@ Getting Started
 To get started, simply open a terminal and type 'cppconsole'.  This should start the CppConsole in your terminal.
 
 CppConsole has five simple commands:
-1.) reload! - reloads CppConsole and resets all declared variables and included header files.
-2.) include - same syntax as C.  This will include the specified header file.
-3.) using namespace - same sytax as C.  This will include the specified namespace.
-4.) "\n" (Entering a blank line) - this will attempt to evaluate the last line of your C code and print it to the console.
-5.) exit - This will exit CppConsole. 
+- **reload!** - reloads CppConsole and resets all declared variables and included header files.
+- **include** - same syntax as C.  This will include the specified header file.
+- **using namespace** - same sytax as C.  This will include the specified namespace.
+- **"\n"** (Entering a blank line) - this will attempt to evaluate the last line of your C code and print it to the console.
+- **exit** - This will exit CppConsole. 
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
 
 As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
 
+```bash
 \#include \<time.h\>
+```
 
 Now we must set type in the remaining code to call the strftime() method:
 
+```bash
 time_t rawtime;
 struct tm * timeinfo;
 char buffer[80];
 time(&rawtime);
 now = localtime(&rawtime);
 strftime(buffer,80,"The date is: %B, %d, %Y",now);
+```
 
 Now we would like to see the contents of buffer.  To print to the screen we can simply type a blank line.  However, the strftime() method returns an integer which we are not interested in.  To get the contents of buffer, enter this:
 
+```bash
 buffer;
+```
 
 and type Enter twice.  This should display today's date in the console.
 
 For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
+```bash
 \#include \<time.h\>
+```
 
 Add the following code to the template's main method:
 
+```bash
 time_t rawtime;
 struct tm * timeinfo;
 char buffer[256];
 time(&rawtime);
 now = localtime(&rawtime);
+```
 
 Now in the console, type the reload command:
 
+```bash
 reload!
+```
 
 This should reload the console to only include the contents of the template file.  Now simply enter the lines:
 
+```bash
 strftime(buffer,256,"The date is: %B, %d, %Y",now);
 buffer;
+```
 
 and press Enter twice.  As you can see, having commonly used headers and variables in the template can save you time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help you remember them in the future.
 
