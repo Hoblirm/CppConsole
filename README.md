@@ -81,7 +81,7 @@ Press Enter twice.  As you can see, having commonly used headers and variables i
 Run on Existing Projects
 ========================
 
-Executing generic code is great, but what if you wanted to tweak some custom class methods in your application.  Lucky for you, CppConsole has the capability to tie into an existing C Project.  This can be done by opening your terminal and moving to your project's main directory.  Then type the command:
+Executing generic code is great, but what if you wanted to tweak some custom class methods in your application.  Lucky for you, CppConsole has the capability to tie into an existing C Project.  This can be done by opening the terminal and moving to the project's main directory.  Once inside, CppConsole can be tied to the project by typing the command:
 
 ```bash
 cppconsole <path of project's main.cpp> <path of project's executable>
