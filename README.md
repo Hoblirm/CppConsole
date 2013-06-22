@@ -6,18 +6,18 @@ This application is a C++ console which allows a developer to quickly execute C+
 Installation
 ============
 
-CppConsole performs several Linux system calls and will not be compatible for Windows.  If you are are fortunate enough to be on Linux, you can quickly set-up CppConsole by compiling main.cpp into an executable.  Using the make command should generate the executable 'cppconsole'.  Add the executable to /usr/bin OR add the project directory to your PATH environment variable.  Verify that the executable can be called by typing 'which cppconsole'.  The executable directory should be displayed.  That is it! You should now be ready to use CppConsole.
+CppConsole performs several Linux system calls and will not be compatible for Windows.  If you are are fortunate enough to be on Linux, you can quickly set-up CppConsole by compiling main.cpp into an executable.  Using the make command should generate the executable 'cppconsole'.  Add the executable to /usr/bin OR add the project directory to the PATH environment variable.  Verify that the executable can be called by typing 'which cppconsole'.  The executable directory should be displayed.  That is it! You should now be ready to use CppConsole.
 
 Getting Started
 ===============
 
-To get started, simply open a terminal and type 'cppconsole'.  This should start the CppConsole in your terminal.
+To get started, simply open a terminal and type 'cppconsole'.  This should start CppConsole in the terminal.
 
 CppConsole has five simple commands:
 - **reload!** - reloads CppConsole and resets all declared variables and included header files.
 - **include** - same syntax as C.  This will include the specified header file.
 - **using namespace** - same sytax as C.  This will include the specified namespace.
-- **"\n"** (Entering a blank line) - this will attempt to evaluate the last line of your C code and print it to the console.
+- **"\n"** (Entering a blank line) - this will attempt to evaluate the last line of C code and print it to the console.
 - **exit** - This will exit CppConsole.
  
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
@@ -47,7 +47,7 @@ buffer;
 
 Press Enter twice.  This should display today's date in the console.
 
-For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
+For this example it took more time declaring the variables than it took to execute the desired method.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
 ```bash
 #include <time.h>
@@ -76,7 +76,7 @@ strftime(buffer,256,"The date is: %B, %d, %Y",now);
 buffer;
 ```
 
-Press Enter twice.  As you can see, having commonly used headers and variables in the template can save you time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help you remember them in the future.
+Press Enter twice.  As you can see, having commonly used headers and variables in the template can save time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help remember them in the future.
 
 Run on Existing Projects
 ========================
@@ -87,7 +87,7 @@ Executing generic code is great, but what if you wanted to tweak some custom cla
 cppconsole <path of project main.cpp> <path of project executable>
 ```
 
-CppConsole assumes that your makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, you should be able to use #include on any of your project's header files.  For projects, it would be a good idea to add most of your project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file.  
+CppConsole assumes that the makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, the #include command should be able to add any of the project's header files.  It would be a good idea to add most of the project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file.  
 
 Limitations
 ===========
