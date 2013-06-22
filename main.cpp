@@ -25,7 +25,7 @@ static string sExecPath = sApp + ".exe"; /**< string of the executable path that
 
 static string sProjMainPath = ""; /**< string of the project's main.cpp path.
                                    * This file is temporarily replaced by sMainPath before compilation.*/
-static string sMakeDir = "."; /**< string of the project's makefile directory.*/
+static string sMakePath = "./makefile"; /**< string of the project's makefile path.*/
 
 static int sBraceCount = 0; /**< keeps count of how deeply the braces are nested
                              *  within the code*/
@@ -49,17 +49,6 @@ string ltrim(string str) {
 bool file_exists(const char* filename) {
   ifstream ifile(filename);
   return ifile;
-}
-
-/**
- * This method determines if a directory exists.
- * @param directory name of the directory
- * @return 1 if the directory exists, 0 otherwise
- */
-bool directory_exists(const char* directory) {
-  struct stat st;
-  if (stat(directory, &st) == 0) return S_ISDIR(st.st_mode);
-  else return false;
 }
 
 /**
@@ -105,7 +94,7 @@ void rollback_file(string filename) {
 
 /**
  * This method will compile the sMainPath file by performing a make in the
- * the directory sMakeDir.  The method is assuming that sExecPath does not
+ * the directory sMakePath.  The method is assuming that sExecPath does not
  * currently exist.  This is neccessary since the file existence is checked
  * to determine if the compile was successful.
  * @return 0 if successful
@@ -130,19 +119,9 @@ int compile() {
       backup_file(sProjMainPath);
       copy(sMainPath, sProjMainPath);
 
-      //Get the current working directory.
-      char cwd[256];
-      getcwd(cwd, 256);
-
-      //Change the directory to where the makefile is located.
-      chdir(sMakeDir.c_str());
-
-      //Perform a make in the makefile directory. Output is piped to grep for
-      //the reasons explained above.
-      system("make --silent 2>&1 | grep error:");
-
-      //Return to the original directory to ensure successive system calls work.
-      chdir(cwd);
+      //Perform a make
+      cmd = string("make -f ") + sMakePath + " --silent 2>&1 | grep error:";
+      system(cmd.c_str());
 
       //Restore the project main.cpp.
       rollback_file(sProjMainPath);
@@ -346,7 +325,7 @@ void add_code(string str) {
 void print_commandline_help() {
   cout << "Usage: ccpconsole [<project main cpp> <project executable file> [options]]\n";
   cout << "Options:\n";
-  cout << "  -m\tProvide project makefile directory. (defaults to '.')\n";
+  cout << "  -m\tProvide project makefile path. (defaults to './makefile')\n";
 }
 
 /**
@@ -376,21 +355,21 @@ int set_parameters(int argc, char** argv) {
         print_commandline_help();
         success = -1;
       } else {
+        if (!file_exists(sMakePath.c_str())) sMakePath = "./Makefile";
         for (int i = 3; i < argc; i += 2) {
           if (string(argv[i]) == "-m") {
-            sMakeDir = argv[i + 1];
-            if (!directory_exists(sMakeDir.c_str())) {
-              cout << "cppconsole: *** Could not find makefile directory: " << sMakeDir << "\n";
-              print_commandline_help();
-              success = -1;
-              break;
-            }
+            sMakePath = argv[i + 1];
           } else {
             cout << "cppconsole: *** Invalid option '" << argv[i] << "'.\n";
             print_commandline_help();
             success = -1;
             break;
           }
+        }
+        if (!file_exists(sMakePath.c_str())) {
+          cout << "cppconsole: *** Could not find makefile: " << sMakePath << "\n";
+          print_commandline_help();
+          success = -1;
         }
       }
     }
