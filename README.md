@@ -23,7 +23,7 @@ Everything else will be interpreted as C code and the user will be notified of a
 
 As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
 
-\##include <time.h>
+\#include \<time.h\>
 
 Now we must set type in the remaining code to call the strftime() method:
 
@@ -42,7 +42,7 @@ and type Enter twice.  This should display today's date in the console.
 
 For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
-\##include <time.h>
+\#include \<time.h\>
 
 Add the following code to the template's main method:
 
