@@ -1,7 +1,7 @@
 CppConsole
 ==========
 
-This application is a C++ console which allows a developer to quickly execute C++ code without going through the painful process recompiling.  The application gives the developer a sandbox to play with new code without disturbing their current project.  Using this application can greatly reduce downtime by allowing the developer to spend more time coding and less time compiling.  CppConsole is intended to mimic scripting language consoles such as Ruby's irb.   
+This application is a C++ console which allows a developer to quickly execute C++ code without going through the painful process of recompiling.  The application gives the developer a sandbox to play with new code without disturbing their current project.  Using this application can greatly reduce downtime by allowing the developer to spend more time coding and less time compiling.  CppConsole is intended to mimic scripting language consoles such as Ruby's irb.   
 
 Installation
 ============
@@ -15,7 +15,7 @@ To get started, simply open a terminal and type 'cppconsole'.  This should start
 
 CppConsole has five simple commands:
 1.) reload! - reloads CppConsole and resets all declared variables and included header files.
-2.) #include - same syntax as C.  This will include the specified header file.
+2.) include - same syntax as C.  This will include the specified header file.
 3.) using namespace - same sytax as C.  This will include the specified namespace.
 4.) "\n" (Entering a blank line) - this will attempt to evaluate the last line of your C code and print it to the console.
 5.) exit - This will exit CppConsole. 
@@ -23,7 +23,7 @@ Everything else will be interpreted as C code and the user will be notified of a
 
 As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
 
-#include <time.h>
+\##include <time.h>
 
 Now we must set type in the remaining code to call the strftime() method:
 
@@ -42,7 +42,7 @@ and type Enter twice.  This should display today's date in the console.
 
 For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
-#include <time.h>
+\##include <time.h>
 
 Add the following code to the template's main method:
 
