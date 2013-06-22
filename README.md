@@ -84,7 +84,7 @@ Run on Existing Projects
 Executing generic code is great, but what if you wanted to tweak some custom class methods in your application.  Lucky for you, CppConsole has the capability to tie into an existing C Project.  This can be done by opening the terminal and moving to the project's main directory.  Once inside, CppConsole can be tied to the project by typing the command:
 
 ```bash
-cppconsole <path of project's main.cpp> <path of project's executable>
+cppconsole <path of project main.cpp> <path of project executable>
 ```
 
 CppConsole assumes that your makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, you should be able to use #include on any of your project's header files.  For projects, it would be a good idea to add most of your project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file.  
