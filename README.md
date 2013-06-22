@@ -44,7 +44,7 @@ Now we would like to see the contents of buffer.  To print to the screen we can 
 buffer;
 ```
 
-and type Enter twice.  This should display today's date in the console.
+Press Enter twice.  This should display today's date in the console.
 
 For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
@@ -75,7 +75,7 @@ strftime(buffer,256,"The date is: %B, %d, %Y",now);
 buffer;
 ```
 
-and press Enter twice.  As you can see, having commonly used headers and variables in the template can save you time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help you remember them in the future.
+Press Enter twice.  As you can see, having commonly used headers and variables in the template can save you time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help you remember them in the future.
 
 Run on Existing Projects
 ========================
