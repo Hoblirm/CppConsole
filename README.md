@@ -24,7 +24,7 @@ Everything else will be interpreted as C code and the user will be notified of a
 As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
 
 ```bash
-\#include \<time.h\>
+#include <time.h>
 ```
 
 Now we must set type in the remaining code to call the strftime() method:
@@ -49,7 +49,7 @@ and type Enter twice.  This should display today's date in the console.
 For this example it took more time declaring the variables than it took to execute the method we were interested in.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
 
 ```bash
-\#include \<time.h\>
+#include <time.h>
 ```
 
 Add the following code to the template's main method:
@@ -82,7 +82,9 @@ Run on Existing Projects
 
 Executing generic code is great, but what if you wanted to tweak some custom class methods in your application.  Lucky for you, CppConsole has the capability to tie into an existing C Project.  This can be done by opening your terminal and moving to your project's main directory.  Then type the command:
 
+```bash
 cppconsole <path of project's main.cpp> <path of project's executable>
+```
 
 CppConsole assumes that your makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, you should be able to use #include on any of your project's header files.  For projects, it would be a good idea to add most of your project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file.  
 
