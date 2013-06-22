@@ -28,7 +28,7 @@ As an example we'll test out the strftime() method in the console.  The strftime
 #include <time.h>
 ```
 
-Now we must set type in the remaining code to call the strftime() method:
+Now we must type in the remaining code to call the strftime() method:
 
 ```bash
 time_t rawtime;
