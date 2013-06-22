@@ -18,7 +18,8 @@ CppConsole has five simple commands:
 - **include** - same syntax as C.  This will include the specified header file.
 - **using namespace** - same sytax as C.  This will include the specified namespace.
 - **"\n"** (Entering a blank line) - this will attempt to evaluate the last line of your C code and print it to the console.
-- **exit** - This will exit CppConsole. 
+- **exit** - This will exit CppConsole.
+ 
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
 
 As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
