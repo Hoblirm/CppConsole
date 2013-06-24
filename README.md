@@ -6,7 +6,16 @@ This application is a C++ console which allows a developer to quickly execute C+
 Installation
 ============
 
-CppConsole performs several Linux system calls and will not be compatible for Windows.  If you are are fortunate enough to be on Linux, you can quickly set-up CppConsole by compiling main.cpp into an executable.  Using the make command should generate the executable 'cppconsole'.  Add the executable to /usr/bin OR add the project directory to the PATH environment variable.  Verify that the executable can be called by typing 'which cppconsole'.  The executable directory should be displayed.  That is it! You should now be ready to use CppConsole.
+CppConsole performs several Linux system calls and will not be compatible for Windows.  If you are are fortunate enough to be on Linux, you can quickly set-up CppConsole by compiling main.cpp into an executable.  Using the make command should generate the executable 'cppconsole'.  Add the executable to /usr/bin OR add the project directory to the PATH environment variable.  Verify that the executable can be called by typing 'which cppconsole'.  The command-line calls are listed below:
+
+```bash
+cd <CppConsole project directory>
+make
+sudo mv cppconsole /usr/bin
+which cppconsole
+```
+
+If the executable directory is displayed, then CppConsole should be properly configured.  You should now be ready to use CppConsole.
 
 Getting Started
 ===============
