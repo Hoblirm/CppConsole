@@ -22,7 +22,13 @@ CppConsole has five simple commands:
  
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
 
-As an example we'll test out the strftime() method in the console.  The strftime() method requires time.h, so include it as a header by typing:
+As an example we'll test out the strftime() method in the console.  Before anything else, ensure that CppConsole is running:
+
+```bash
+cppconsole
+```
+
+Once CppConsole starts up, we are ready to being the example.  Since we'll be using the strftime() method, we'll need to include the time.h header.  Enter this into the console:
 
 ```bash
 #include <time.h>
