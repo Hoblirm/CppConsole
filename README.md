@@ -84,7 +84,6 @@ now = localtime(&rawtime);
 Close the file and execute CppConsole:
 
 ```bash
-exit
 cppconsole
 ```
 
