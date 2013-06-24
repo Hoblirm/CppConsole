@@ -6,12 +6,27 @@
 //============================================================================
 #include <sys/stat.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <iostream>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
+
+#if defined (HAVE_CONFIG_H)
+#include <config.h>
+#endif
+#include <stdio.h>
+#include <sys/types.h>
+
+#if defined (READLINE_LIBRARY)
+#include "posixstat.h"
+#include "readline.h"
+#include "history.h"
+#else
+#include <sys/stat.h>
+#include <readline/readline.h>
+#include <readline/history.h>
+#endif
 
 using namespace std;
 
@@ -29,6 +44,34 @@ static string sMakePath = "./makefile"; /**< string of the project's makefile pa
 
 static int sBraceCount = 0; /**< keeps count of how deeply the braces are nested
                              *  within the code*/
+
+static char *line_read = (char *)NULL;
+
+/**
+ * This method reads in a line of text giving cursor control, history, and
+ * tabular completion. Makes use of the Readline library.
+ * @return Ptr to line read in or NULL for EOF
+ */
+char * rl_gets ()
+{
+  /* If the buffer has already been allocated, return the memory
+     to the free pool. */
+  if (line_read)
+    {
+      free (line_read);
+      line_read = (char *)NULL;
+    }
+
+  /* Get a line from the user. */
+  line_read = readline ("CppConsole:>");
+
+  /* If the line has any text in it, save it on the history. */
+  if (line_read && *line_read)
+    add_history (line_read);
+
+
+  return (line_read);
+}
 
 /**
  * This method trims the whitespaces off the left side of a string.
@@ -392,19 +435,6 @@ void clean_files() {
 }
 
 /**
- * This method prints the console header.
- */
-void print_console_prefix() {
-  string brace_str;
-  if (sBraceCount == 0) brace_str = ":";
-  for (int i = 0; i < sBraceCount; i++) {
-    brace_str += "{";
-  }
-
-  cout << "CppConsole" << brace_str << ">";
-}
-
-/**
  * This method evaluates a command and prints it to the user.
  * @param cmd the command string being evaluated
  */
@@ -421,6 +451,7 @@ void evaluate_command(string cmd) {
   }
 }
 
+
 /**
  * The main method of the code the reads user input.
  * @param argc number of commandline arguments
@@ -432,26 +463,28 @@ int main(int argc, char** argv) {
     if (reload() != 0) {
       cout << "cppconsole: *** Compile failed. Ensure " << sConfigPath << " has no syntax errors.\n";
     } else {
-      string last_input;
-      string input_str = "";
-      while (input_str != "exit") {
-        print_console_prefix();
 
-        last_input = input_str;
-        getline(cin, input_str);
+      char last_input[256];
+      char * input_str = "";
 
-        if (input_str == "") {
-          evaluate_command(last_input);
-        } else if (strncmp(input_str.c_str(), "#include", 8) == 0) {
-          add_includes(input_str);
-        } else if (strncmp(input_str.c_str(), "using namespace", 15) == 0) {
-          add_includes(input_str);
-        } else if (input_str == "reload!") {
+      while (strcmp(input_str,"exit")!=0) {
+
+        strcpy(last_input,input_str);
+
+        input_str = rl_gets();
+
+        if (strcmp(input_str,"")==0) {
+          evaluate_command(string(last_input));
+        } else if (strncmp(input_str, "#include", 8) == 0) {
+          add_includes(string(input_str));
+        } else if (strncmp(input_str, "using namespace", 15) == 0) {
+          add_includes(string(input_str));
+        } else if (strcmp(input_str,"reload!")==0) {
           reload();
-        } else if (input_str == "exit") {
+        } else if (strcmp(input_str,"exit")==0) {
           break;
         } else {
-          add_code(input_str);
+          add_code(string(input_str));
         }
       }
     }
