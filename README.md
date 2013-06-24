@@ -32,7 +32,7 @@ Now we must type in the remaining code to call the strftime() method:
 
 ```bash
 time_t rawtime;
-struct tm * timeinfo;
+struct tm * now;
 char buffer[80];
 time(&rawtime);
 now = localtime(&rawtime);
@@ -57,19 +57,20 @@ Add the following code to the template's main method:
 
 ```bash
 time_t rawtime;
-struct tm * timeinfo;
+struct tm * now;
 char buffer[256];
 time(&rawtime);
 now = localtime(&rawtime);
 ```
 
-Now in the console, type the reload command:
+Now restart CppConsole by typing 'exit' and restarting the application:
 
 ```bash
-reload!
+exit
+cppconsole
 ```
 
-This should reload the console to only include the contents of the template file.  Now simply enter the lines:
+The console should be initialized with the contents of the template file.  Now simply enter the lines:
 
 ```bash
 strftime(buffer,256,"The date is: %B, %d, %Y",now);
