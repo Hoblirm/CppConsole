@@ -53,13 +53,25 @@ buffer;
 
 Press Enter twice.  This should display today's date in the console.
 
-For this example it took more time declaring the variables than it took to execute the desired method.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Open cpp_console.config and add this to the top of the file:
+For this example it took more time declaring the variables than it took to execute the desired method.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Quickly exit CppConsole:
+
+```bash
+exit
+```
+
+The current directory should contain the config file.  Open the file to make the necessary changes:
+
+```bash
+vim cpp_console.config
+```
+
+Add the 'time.h' header to the top of the config file:
 
 ```bash
 #include <time.h>
 ```
 
-Add the following code to the template's main method:
+In addtion, type the following code in the template's main method:
 
 ```bash
 time_t rawtime;
@@ -69,7 +81,7 @@ time(&rawtime);
 now = localtime(&rawtime);
 ```
 
-Now restart CppConsole by typing 'exit' and restarting the application:
+Close the file and execute CppConsole:
 
 ```bash
 exit
