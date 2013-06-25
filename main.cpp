@@ -91,17 +91,6 @@ string ltrim(string str) {
 }
 
 /**
- * This method trims the whitespaces off the left side of a string.
- * @param str parameter string that will be trimmed
- * @return a string with the white spaces trimmed off the left side.
- */
-string rtrim(string str) {
-  size_t endpos = str.find_last_not_of(" \t");
-  if (string::npos != endpos) return str.substr(0, endpos + 1);
-  else return str;
-}
-
-/**
  * This method determines if a given file exists.
  * @param filename the name of the file
  * @return 1 if the file exists, 0 otherwise
