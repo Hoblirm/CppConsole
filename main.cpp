@@ -28,6 +28,10 @@
 #include <readline/history.h>
 #endif
 
+#define INCLUDE_CODE 0
+#define STATIC_CODE 1
+#define MAIN_CODE 2
+
 using namespace std;
 
 static ostringstream sCodeBuffer; /**< stream used to store user input.*/
@@ -44,30 +48,32 @@ static string sMakePath = "./makefile"; /**< string of the project's makefile pa
 
 static int sBraceCount = 0; /**< keeps count of how deeply the braces are nested
                              *  within the code*/
+static int sCodeType = MAIN_CODE;
+static const string sCodeDelimiter[3] = {"template <typename T> void cpp_console_print(T value)",
+  "int main(int argc, char** argv)",
+  "return EXIT_SUCCESS;"};
 
-static char *line_read = (char *)NULL;
+static char *line_read = (char *) NULL;
 
 /**
  * This method reads in a line of text giving cursor control, history, and
  * tabular completion. Makes use of the Readline library.
  * @return Ptr to line read in or NULL for EOF
  */
-char * rl_gets ()
-{
+char * rl_gets() {
   /* If the buffer has already been allocated, return the memory
      to the free pool. */
-  if (line_read)
-    {
-      free (line_read);
-      line_read = (char *)NULL;
-    }
+  if (line_read) {
+    free(line_read);
+    line_read = (char *) NULL;
+  }
 
   /* Get a line from the user. */
-  line_read = readline ("CppConsole:>");
+  line_read = readline("CppConsole:>");
 
   /* If the line has any text in it, save it on the history. */
   if (line_read && *line_read)
-    add_history (line_read);
+    add_history(line_read);
 
 
   return (line_read);
@@ -81,6 +87,17 @@ char * rl_gets ()
 string ltrim(string str) {
   size_t startpos = str.find_first_not_of(" \t");
   if (string::npos != startpos) return str.substr(startpos);
+  else return str;
+}
+
+/**
+ * This method trims the whitespaces off the left side of a string.
+ * @param str parameter string that will be trimmed
+ * @return a string with the white spaces trimmed off the left side.
+ */
+string rtrim(string str) {
+  size_t endpos = str.find_last_not_of(" \t");
+  if (string::npos != endpos) return str.substr(0, endpos + 1);
   else return str;
 }
 
@@ -177,40 +194,11 @@ int compile() {
 }
 
 /**
- * This method will reset the code buffer back to a state where it can accept
- * new user input.  It loads in the current main.cpp file and leaves out the
- * bottom of the file after the main.cpp return.  In this state, user code may
- * easily be appended to the end of the buffer.
- */
-void reload_code_buffer() {
-  //Wipe out the entire content of the buffer.
-  sCodeBuffer.str("");
-  sCodeBuffer.clear();
-
-  //Open the main.cpp file to read data.
-  ifstream inputFile;
-  inputFile.open(sMainPath.c_str());
-
-  string line;
-  while (getline(inputFile, line)) {
-    //We can quit reading once we reach the return in main.cpp.
-    if (ltrim(line) == "return EXIT_SUCCESS;") {
-      break;
-    } else if (strncmp(ltrim(line).c_str(), "cpp_console_print(", 18) != 0) {
-      //Code will be added to the buffer if it is NOT a console print statement.
-      sCodeBuffer << line << "\n";
-    }
-  }
-
-  inputFile.close();
-}
-
-/**
  * This method will execute the given codeStream passed in.
  * @param codeStream stream of C++ code that contains a compilable main() method
  * @return 0 if compilation is successful
  */
-int execute(ostringstream* codeStream) {
+int execute(ostringstream* codeStream, bool force_rollback) {
   int output = 0;
 
   //Backup the main file before it gets overwritten by the code stream.
@@ -234,10 +222,10 @@ int execute(ostringstream* codeStream) {
     char full_path[256];
     realpath(sExecPath.c_str(), full_path);
     system(full_path);
-  } else {
-    //If compilation failed, rollback the main file to remove syntax errors.
-    rollback_file(sMainPath);
   }
+
+  //Rollback if force flag is set, or if compilation failed.
+  if ((force_rollback)||(output!=0)) rollback_file(sMainPath);
 
   //Rollback the executable after it is done.  This is to prevent a project
   //executable from getting modified.  This only applies when the console in
@@ -246,7 +234,9 @@ int execute(ostringstream* codeStream) {
 
   //Now that the main file is in its final state, the code buffer can safely
   //be reloaded to accept new user input.
-  reload_code_buffer();
+  sCodeBuffer.str("");
+  sCodeBuffer.clear();
+  sCodeType = MAIN_CODE;
 
   return output;
 }
@@ -267,8 +257,7 @@ void create_config_template() {
   output << "\n";
   output << "//This method is required to allow the CppConsole to print.\n";
   output << "// *** Do not remove this method.\n";
-  output << "template <typename T>\n";
-  output << "void cpp_console_print(T value){\n";
+  output << "template <typename T> void cpp_console_print(T value){\n";
   output << "  stringstream ss;\n";
   output << "  ss << value << \"\\n\";\n";
   output << "  cout << ss.str();\n";
@@ -313,31 +302,39 @@ int reload() {
   load_config_template(&stream);
 
   //Execute the stream to verify if the reload was successful.
-  return execute(&stream);
+  return execute(&stream,false);
 }
 
 /**
- * This method will add an #include or namespace to the main file.
- * @param str the line of code containing an include or namespace
+ * This method will initialize the code buffer. 
  */
-void add_includes(string str) {
-  //Create a stream to store the code.
-  ostringstream output;
-
-  //Pre-pend the stream with the include/namespace information.
-  output << str << "\n";
-
+void prepend_code(ostringstream* stream) {
   //Add the code in the current main file to the stream.
   ifstream inputFile;
   inputFile.open(sMainPath.c_str());
   string line;
   while (getline(inputFile, line)) {
-    output << line << "\n";
+    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[sCodeType].c_str(), sCodeDelimiter[sCodeType].length()) == 0) break;
+    *stream << line << "\n";
+  }
+
+  inputFile.close();
+}
+
+/**
+ *
+ */
+void append_code(ostringstream* stream) {
+  //Add the code in the current main file to the stream.
+  ifstream inputFile;
+  inputFile.open(sMainPath.c_str());
+  string line;
+  bool read = false;
+  while (getline(inputFile, line)) {
+    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[sCodeType].c_str(), sCodeDelimiter[sCodeType].length()) == 0) read = true;
+    if (read) *stream << line << "\n";
   }
   inputFile.close();
-
-  //Execute the code to verify the syntax and update the main file.
-  execute(&output);
 }
 
 /**
@@ -345,21 +342,52 @@ void add_includes(string str) {
  * @param str the new line of code to add
  */
 void add_code(string str) {
-  //Add the code to the buffer.
-  sCodeBuffer << str << "\n";
+  if (sCodeBuffer.str() == "") prepend_code(&sCodeBuffer);
+
 
   //Count the braces and keep track of how deeply they are nested.
   sBraceCount += count(str.begin(), str.end(), '{');
   sBraceCount -= count(str.begin(), str.end(), '}');
   if (sBraceCount < 0) sBraceCount = 0;
 
+  bool force_rollback = false;
+  if (sBraceCount == 0) {
+    if (str[str.length() - 1] == '!') {
+      str[str.length() - 1] = ';';
+      force_rollback = true;
+    } else if (str[str.length() - 1] == '@') {
+      force_rollback = true;
+      str[str.length() - 1] = ' ';
+      str = string("cpp_console_print(") + str + string(");");
+    }
+  }
+
+  //Add the code to the buffer.
+  sCodeBuffer << str << "\n";
+
   //If the code is not nested in any braces, we can attempt to execute.
   if (sBraceCount == 0) {
-    //The end of main() must be appended to the buffer before execution.
-    sCodeBuffer << "return EXIT_SUCCESS;" << "\n";
-    sCodeBuffer << "}\n";
-    execute(&sCodeBuffer);
+    append_code(&sCodeBuffer);
+    execute(&sCodeBuffer,force_rollback);
   }
+}
+
+/**
+ * This method will add an #include or namespace to the main file.
+ * @param str the line of code containing an include or namespace
+ */
+void add_static_code(string str) {
+  sCodeType = STATIC_CODE;
+  add_code(str);
+}
+
+/**
+ * This method will add an #include or namespace to the main file.
+ * @param str the line of code containing an include or namespace
+ */
+void add_includes(string str) {
+  sCodeType = INCLUDE_CODE;
+  add_code(str);
 }
 
 /**
@@ -435,24 +463,6 @@ void clean_files() {
 }
 
 /**
- * This method evaluates a command and prints it to the user.
- * @param cmd the command string being evaluated
- */
-void evaluate_command(string cmd) {
-  //Evaluation will only occur if the code is not nested and the command is set.
-  if ((sBraceCount == 0) && (cmd != "")) {
-    //To display the result to the user, the command must be inserted into the
-    //cpp_console_print() method.
-    replace(cmd.begin(), cmd.end(), ';', ' ');
-    string print_cmd = string("cpp_console_print(") + cmd + string(");");
-
-    //Execute the code to perform the evaluation.
-    add_code(print_cmd);
-  }
-}
-
-
-/**
  * The main method of the code the reads user input.
  * @param argc number of commandline arguments
  * @param argv the commandline arguments
@@ -467,21 +477,23 @@ int main(int argc, char** argv) {
       char last_input[256];
       char * input_str = "";
 
-      while (strcmp(input_str,"exit")!=0) {
+      while (strcmp(input_str, "exit") != 0) {
 
-        strcpy(last_input,input_str);
+        strcpy(last_input, input_str);
 
         input_str = rl_gets();
 
-        if (strcmp(input_str,"")==0) {
-          evaluate_command(string(last_input));
+        if (strcmp(input_str, "") == 0) {
+          //no-op
         } else if (strncmp(input_str, "#include", 8) == 0) {
           add_includes(string(input_str));
         } else if (strncmp(input_str, "using namespace", 15) == 0) {
           add_includes(string(input_str));
-        } else if (strcmp(input_str,"reload!")==0) {
+        } else if (strncmp(input_str, "static ", 7) == 0) {
+          add_static_code(string(input_str));
+        } else if (strcmp(input_str, "reload!") == 0) {
           reload();
-        } else if (strcmp(input_str,"exit")==0) {
+        } else if (strcmp(input_str, "exit") == 0) {
           break;
         } else {
           add_code(string(input_str));
