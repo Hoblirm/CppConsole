@@ -22,9 +22,9 @@ Getting Started
 
 Before starting CppConsole, you should be familiar with the commands.  CppConsole has five simple commands:
 - **reload!** - reloads CppConsole and resets all declared variables and included header files.
-- **include** - same syntax as C.  This will include the specified header file.
+- **#include** - same syntax as C.  This will include the specified header file.
 - **using namespace** - same sytax as C.  This will include the specified namespace.
-- **"\n"** (Entering a blank line) - this will attempt to evaluate the last line of C code and print it to the console.
+- **(Entering a blank line)** - this will attempt to evaluate the last line of C code and print it to the console.
 - **exit** - This will exit CppConsole.
  
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
