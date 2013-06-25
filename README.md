@@ -20,9 +20,7 @@ If the executable directory is displayed, then CppConsole should be properly con
 Getting Started
 ===============
 
-To get started, simply open a terminal and type 'cppconsole'.  This should start CppConsole in the terminal.
-
-CppConsole has five simple commands:
+Before starting CppConsole, you should be familiar with the commands.  CppConsole has five simple commands:
 - **reload!** - reloads CppConsole and resets all declared variables and included header files.
 - **include** - same syntax as C.  This will include the specified header file.
 - **using namespace** - same sytax as C.  This will include the specified namespace.
