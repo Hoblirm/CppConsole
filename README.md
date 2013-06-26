@@ -112,7 +112,8 @@ In this example we'll cover adding methods through the console.  The only trick 
 static int s=0;
 
 static string increment(int v, int *p) {
-  s++; v++; *p++;
+  s++; v++; 
+  *p = *p+1;
   ostringstream stream;
   stream << "Inside the method: s=" << s << " v=" << v << " p=" << *p << "\n";
   return stream.str();
@@ -131,15 +132,15 @@ str@
 We can check the variables after the method and should only expect p and s to be incremented:
 
 ```bash
-@v
+v@
 =>0
 ```
 ```bash
-@p
+p@
 => 1
 ```
 ```bash
-@s
+s@
 => 1
 ```
 
