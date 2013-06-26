@@ -20,12 +20,12 @@ If the executable directory is displayed, then CppConsole should be properly con
 Getting Started
 ===============
 
-Before starting CppConsole, you should be familiar with the commands.  CppConsole a few simple commands:
+Before starting CppConsole, you should be familiar with the commands.  CppConsole has a few simple commands:
 - **#include** - same syntax as C.  This will include the specified header file.
-- **using namespace** - same sytax as C.  This will include the specified namespace.i
+- **using namespace** - same sytax as C.  This will include the specified namespace.
 - **static** - same syntax as C.  This will declare static variables and methods.  **All methods defined within CppConsole must be declared as static or you'll recieve a syntax error.
 - **!** - use in place of a semi-colon to force a single execution.  This command cannot be used within methods or if-statements.  However, it can be applied to the end of a large if-statement block.  See the example below for more information about preventing re-execution.
-- **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf since they can cause re-executed output.i
+- **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf since they can cause re-executed output.
 - **reload!** - reloads CppConsole and resets all declared variables and included header files.
 - **exit** - This will exit CppConsole.
  
@@ -124,7 +124,6 @@ Now that the method had been declared, we can use it inside the code:
 int v,p;
 string str = increment(v,&p);
 str@
-
 => Inside the method: s=1 v=1 p=1
 ```
 
@@ -132,17 +131,14 @@ We can check the variables after the method and should only expect p and s to be
 
 ```bash
 @v
-
 =>0
 ```
 ```bash
 @p
-
 => 1
 ```
 ```bash
 @s
-
 => 1
 ```
 
@@ -166,7 +162,7 @@ Now start CppConsole and use the append method:
 ```bash
 cppconsole
 append_file();
-=> Appending to the file.  This should be executed only once!"
+=> Appending to the file.  This should be executed only once!
 ```
 
 Now use the read method:
@@ -182,7 +178,7 @@ As you can see, the appending to file was executed twice.  This can be prevented
 ```bash
 reload!
 append_file()!
-=> Appending to the file.  This should be executed only once!"
+=> Appending to the file.  This should be executed only once!
 read_file();
 => Reading the file... This may be executed multiple times.
 ```
