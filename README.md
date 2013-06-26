@@ -123,7 +123,7 @@ static string increment(int v, int *p) {
 }
 ```
 
-Now that the method has been declared, we can use it inside the code:
+Once a method is declared, it can be used at any point inside the console.  Test out the method with the following lines:
 
 ```bash
 int v=0, p=0;
