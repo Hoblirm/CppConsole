@@ -146,7 +146,7 @@ s@
 
 Prevent Re-execution
 ====================
-When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example gives shows you when it is appropriate to use the '!' command.
+When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example shows you when it is appropriate to use the '!' command.
 
 Open cpp_console.config and add these two methods: 
 
