@@ -24,8 +24,8 @@ Before starting CppConsole, you should be familiar with the commands.  CppConsol
 - **#include** - same syntax as C.  This will include the specified header file.
 - **using namespace** - same sytax as C.  This will include the specified namespace.
 - **static** - same syntax as C.  This will declare static variables and methods.  **All methods defined within CppConsole must be declared as static or you'll recieve a syntax error.
-- **!** - use in place of a semi-colon to force a single execution.  This command cannot be used within methods or if-statements.  However, it can be applied to the end of a large if-statement block.  See the example below for more information about preventing re-execution.
-- **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf since they can cause re-executed output.
+- **!** - use in place of a semi-colon to force a single execution.  This command cannot be used within methods or if-statements.  However, it can be applied to the end of a large if-statement block.  See the examples below for more information about preventing re-execution.
+- **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf to avoid re-executed output.
 - **reload!** - reloads CppConsole and resets all declared variables and included header files.
 - **exit** - This will exit CppConsole.
  
@@ -54,7 +54,7 @@ now = localtime(&rawtime);
 strftime(buffer,80,"The date is: %B, %d, %Y",now);
 ```
 
-Now we would like to see the contents of buffer.  To print to the screen we can simply type a blank line.  However, the strftime() method returns an integer which we are not interested in.  To get the contents of buffer, enter this:
+Now we would like to see the contents of buffer.  To get the contents of buffer, enter this:
 
 ```bash
 buffer@
@@ -120,7 +120,7 @@ static string increment(int v, int *p) {
 }
 ```
 
-Now that the method had been declared, we can use it inside the code:
+Now that the method has been declared, we can use it inside the code:
 
 ```bash
 int v,p;
@@ -146,7 +146,7 @@ s@
 
 Prevent Re-execution
 ====================
-When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example shows you when it is appropriate to use the '!' command.
+When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example shows when it is appropriate to use the '!' command.
 
 Open cpp_console.config and add these two methods: 
 
