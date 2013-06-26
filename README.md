@@ -26,7 +26,8 @@ Before starting CppConsole, you should be familiar with the commands.  CppConsol
 - **static** - same syntax as C.  This will declare static variables and methods.  **All methods defined within CppConsole must be declared as static or you'll recieve a syntax error.
 - **!** - use in place of a semi-colon to force a single execution.  This command cannot be used within methods or if-statements.  However, it can be applied to the end of a large if-statement block.  See the examples below for more information about preventing re-execution.
 - **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf to avoid re-executed output.
-- **reload!** - reloads CppConsole and resets all declared variables and included header files.
+- **reload!** - reloads CppConsole and clears out all user declared variables and commands.  
+- **dump!** - this displays all the user commands since the last reload. This is good to use when you want to copy/paste console commands.
 - **exit** - This will exit CppConsole.
  
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
@@ -51,13 +52,14 @@ struct tm * now;
 char buffer[80];
 time(&rawtime);
 now = localtime(&rawtime);
-strftime(buffer,80,"The date is: %B, %d, %Y",now);
+strftime(buffer,80,"The date is: %B %d, %Y",now);
 ```
 
 Now we would like to see the contents of buffer.  To get the contents of buffer, enter this:
 
 ```bash
 buffer@
+=> The date is: June 26, 2013
 ```
 
 This should display today's date in the console.
@@ -99,8 +101,9 @@ cppconsole
 The console should be initialized with the contents of the template file.  Now simply enter the lines:
 
 ```bash
-strftime(buffer,256,"The date is: %B, %d, %Y",now);
+strftime(buffer,256,"The date is: %B %d, %Y",now);
 buffer@
+=> The date is: June 26, 2013
 ```
 As you can see, having commonly used headers and variables in the template can save time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help remember them in the future.
 
@@ -148,44 +151,91 @@ Prevent Re-execution
 ====================
 When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example shows when it is appropriate to use the '!' command.
 
-Open cpp_console.config and add these two methods: 
+Open cpp_console.config and copy/paste the following code above the main() method: 
 
 ```bash
-static void append_file(){
-  cout << "Appending to the file.  This should be executed only once!\n";
-} 
-static void read_file(){
-  cout << "Reading the file... This may be executed multiple times.\n";
+#include <sstream>
+#include <fstream>
+
+static string read_file(){
+  ostringstream stream; //Input the file into a stream.
+  ifstream input;
+  input.open("tmp.txt");
+  string line;
+  while (getline(input, line)) {
+    stream << line << "\n";
+  }
+  input.close();
+  
+  return stream.str(); //Return the string.
 }
+
+static void append_file(string str){
+  ostringstream stream; //Get the original file contents
+  stream << read_file();
+  
+  stream << str << "\n"; //Append the string
+  
+  ofstream output; //Write the appended text to the file.
+  output.open("tmp.txt");
+  output << stream.str();
+  output.close();
+} 
+
+static ostringstream sStream;
+static string read_string(){
+  return sStream.str();
+} 
+static void append_string(string str){
+  sStream << str << "\n";
+} 
+
 ```
 
 Now start CppConsole and use the append method:
 
 ```bash
 cppconsole
-append_file();
-=> Appending to the file.  This should be executed only once!
+append_string("Adding line 1 to string.");
+append_file("Adding line 1 to file.");
 ```
 
 Now use the read method:
 
 ```bash
-read_file();
-=> Appending to the file.  This should be executed only once!
-=> Reading the file... This may be executed multiple times.
+read_file()@
+=> Adding line 1 to file.
+=> Adding line 1 to file.
+read_string()@
+=> Adding line 1 to string.
 ```
 
-As you can see, the appending to file was executed twice.  This can be prevented with the '!' command.  Reload the console and re-enter the commands:
+As you can see, the appending to a string worked correctly, but not for the file.  Re-execution will reset console variables, but not external entities.  Lets retry this example using the '!' method:
 
 ```bash
+remove("tmp.txt");
 reload!
-append_file()!
-=> Appending to the file.  This should be executed only once!
-read_file();
-=> Reading the file... This may be executed multiple times.
+append_string("Adding line 1 to string.")!
+append_file("Adding line 1 to file.")!
+read_string()@
+=> 
+read_file()@
+=> Adding line 1 to file.
 ```
 
-The '!' command should have prevented the file from being appended to twice.  It is import to remember that '!' should be used whenever entities external to the console code are modified.
+This time the string method failed to give the appropriate result.  It is important to realize that using '!' command will not store changes made to variables in the command. To give the correct results, you must know when to use '!' only when it is appropriate:
+
+```bash
+remove("tmp.txt");
+reload!
+append_string("Adding line 1 to string.");
+append_file("Adding line 1 to file.")!
+read_string()@
+=> Adding line 1 to string.
+read_file()@
+=> Adding line 1 to file.
+```
+
 
 Run on Existing Projects
 ========================
