@@ -133,7 +133,7 @@ We can check the variables after the method and should only expect p and s to be
 
 ```bash
 v@
-=>0
+=> 0
 ```
 ```bash
 p@
@@ -152,10 +152,10 @@ Open cpp_console.config and add these two methods:
 
 ```bash
 static void append_file(){
-  cout << "Appending to the file.  This should be executed only once!";
+  cout << "Appending to the file.  This should be executed only once!\n";
 } 
 static void read_file(){
-  cout << "Reading the file... This may be executed multiple times.";
+  cout << "Reading the file... This may be executed multiple times.\n";
 }
 ```
 
