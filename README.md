@@ -113,7 +113,7 @@ static int s=0;
 
 static string increment(int v, int *p) {
   s++; v++; *p++;
-  ostringstream s = "Inside the method: s=" << s << " v=" << v << " p=" << *p << "\n";
+  ostringstream s << "Inside the method: s=" << s << " v=" << v << " p=" << *p << "\n";
   return s.str();
 }
 ```
