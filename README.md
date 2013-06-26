@@ -137,12 +137,8 @@ We can check the variables after the method and should only expect p and s to be
 ```bash
 v@
 => 0
-```
-```bash
 p@
 => 1
-```
-```bash
 s@
 => 1
 ```
@@ -210,7 +206,7 @@ read_string()@
 => Adding line 1 to string.
 ```
 
-As you can see, the appending to a string worked correctly, but not for the file.  Re-execution will reset console variables, but not external entities.  Lets retry this example using the '!' method:
+As you can see, appending to a string worked correctly, but not for the file.  Re-execution will reset console variables, but not external entities.  Lets retry this example using the '!' method:
 
 ```bash
 remove("tmp.txt");
@@ -223,7 +219,7 @@ read_file()@
 => Adding line 1 to file.
 ```
 
-This time the string method failed to give the appropriate result.  It is important to realize that using '!' command will not store changes made to variables in the command. To give the correct results, you must know when to use '!' only when it is appropriate:
+This time the string method failed to give the appropriate result.  It is important to realize that using the '!' command will not store changes made to variables. To get the correct results, the '!' command should only be used when it is appropriate:
 
 ```bash
 remove("tmp.txt");
