@@ -185,6 +185,9 @@ int compile() {
 /**
  * This method will execute the given codeStream passed in.
  * @param codeStream stream of C++ code that contains a compilable main() method
+ * @param force_rollback if set, this will rollback any changes made to the code
+ *                       during execution. This is used for the '!' and '@'
+ *                       commands.
  * @return 0 if compilation is successful
  */
 int execute(ostringstream* codeStream, bool force_rollback) {
@@ -214,18 +217,19 @@ int execute(ostringstream* codeStream, bool force_rollback) {
   }
 
   //Rollback if force flag is set, or if compilation failed.
-  if ((force_rollback)||(output!=0)) rollback_file(sMainPath);
+  if ((force_rollback) || (output != 0)) rollback_file(sMainPath);
 
   //Rollback the executable after it is done.  This is to prevent a project
   //executable from getting modified.  This only applies when the console in
   //running in a project directory.
   rollback_file(sExecPath);
 
-  //Now that the main file is in its final state, the code buffer can safely
-  //be reloaded to accept new user input.
-  sCodeBuffer.str("");
+  //Reset variables now that the code was executed.
+  sCodeBuffer.str(""); //Clear out the code buffer to allow new user input.
   sCodeBuffer.clear();
-  sCodeType = MAIN_CODE;
+  sCodeType = MAIN_CODE; //Reset the code type to its default.
+  sBraceCount = 0; //Ensure the brace count is zero.  A reload! can force an
+  //execution even if the brace count is not zero.
 
   return output;
 }
@@ -238,19 +242,14 @@ void create_config_template() {
   ofstream output;
   output.open(sConfigPath.c_str());
 
-  output << "//<Add additional includes and namespaces here.>\n";
-  output << "#include <stdlib.h>\n";
-  output << "#include <iostream>\n";
-  output << "#include <sstream>\n";
+  output << "#include <stdlib.h> //**Required for CppConsole.\n";
+  output << "#include <iostream> //**Required for CppConsole.\n";
+  output << "#include <sstream> //**Required for CppConsole.\n";
   output << "using namespace std;\n";
   output << "\n";
-  output << "//This method is required to allow the CppConsole to print.\n";
-  output << "// *** Do not remove this method.\n";
-  output << "template <typename T> void cpp_console_print(T value){\n";
-  output << "  stringstream ss;\n";
-  output << "  ss << value << \"\\n\";\n";
-  output << "  cout << ss.str();\n";
-  output << "}\n";
+  output << "//<Add additional includes and namespaces here.>\n";
+  output << "\n";
+  output << "//<Add additional methods here.>\n";
   output << "\n";
   output << "int main(int argc, char** argv) {\n";
   output << "//<Add custom initialization logic here.>\n";
@@ -261,7 +260,9 @@ void create_config_template() {
 }
 
 /**
- * This method loads the configuration template into a stream.
+ * This method loads the configuration template into a stream. The method
+ * cpp_console_print is always loaded in since it is used to perform the '@'
+ * command.
  * @param stream the pointer to the stream loaded with template data
  */
 void load_config_template(ostringstream* stream) {
@@ -269,6 +270,13 @@ void load_config_template(ostringstream* stream) {
   inputFile.open(sConfigPath.c_str());
   string line;
   while (getline(inputFile, line)) {
+    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[STATIC_CODE].c_str(), sCodeDelimiter[STATIC_CODE].length()) == 0) {
+      *stream << "template <typename T> void cpp_console_print(T value){\n";
+      *stream << "  stringstream ss;\n";
+      *stream << "  ss << value << \"\\n\";\n";
+      *stream << "  cout << ss.str();\n";
+      *stream << "}\n";
+    }
     *stream << line << "\n";
   }
   inputFile.close();
@@ -291,11 +299,15 @@ int reload() {
   load_config_template(&stream);
 
   //Execute the stream to verify if the reload was successful.
-  return execute(&stream,false);
+  return execute(&stream, false);
 }
 
 /**
- * This method will initialize the code buffer. 
+ * This method prepend the code buffer with the code at the beginning of the
+ * file.  Depending on the code type (it could be an include, static method,
+ * code in the main method), it effects where the code is inserted.  The
+ * sCodeDelimiter is used to determine which part of the file is prepended.
+ * @param stream points to the stream that gets the prepended code.
  */
 void prepend_code(ostringstream* stream) {
   //Add the code in the current main file to the stream.
@@ -311,7 +323,11 @@ void prepend_code(ostringstream* stream) {
 }
 
 /**
- *
+ * This method appends the code buffer with the code at the end of the
+ * file.  Depending on the code type (it could be an include, static method,
+ * code in the main method), it effects where the code is inserted.  The
+ * sCodeDelimiter is used to determine which part of the file is appended.
+ * @param stream points to the stream that gets the appended code.
  */
 void append_code(ostringstream* stream) {
   //Add the code in the current main file to the stream.
@@ -333,18 +349,20 @@ void append_code(ostringstream* stream) {
 void add_code(string str) {
   if (sCodeBuffer.str() == "") prepend_code(&sCodeBuffer);
 
-
   //Count the braces and keep track of how deeply they are nested.
   sBraceCount += count(str.begin(), str.end(), '{');
   sBraceCount -= count(str.begin(), str.end(), '}');
   if (sBraceCount < 0) sBraceCount = 0;
 
+  //Force rollback defaults to false. It is only set by the '!' and '@' commands
   bool force_rollback = false;
   if (sBraceCount == 0) {
     if (str[str.length() - 1] == '!') {
+      //The '!' command was used.  Replace it with a semi-colon and set the flag.
       str[str.length() - 1] = ';';
       force_rollback = true;
     } else if (str[str.length() - 1] == '@') {
+      //The '@' command was used.  Wrap the code in the cpp_console_print() method.
       force_rollback = true;
       str[str.length() - 1] = ' ';
       str = string("cpp_console_print(") + str + string(");");
@@ -357,13 +375,14 @@ void add_code(string str) {
   //If the code is not nested in any braces, we can attempt to execute.
   if (sBraceCount == 0) {
     append_code(&sCodeBuffer);
-    execute(&sCodeBuffer,force_rollback);
+    execute(&sCodeBuffer, force_rollback);
   }
 }
 
 /**
- * This method will add an #include or namespace to the main file.
- * @param str the line of code containing an include or namespace
+ * This method will add the code before the main() method.  Typically used for
+ * method definitions.
+ * @param str the line of code
  */
 void add_static_code(string str) {
   sCodeType = STATIC_CODE;

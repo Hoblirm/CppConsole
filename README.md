@@ -20,11 +20,13 @@ If the executable directory is displayed, then CppConsole should be properly con
 Getting Started
 ===============
 
-Before starting CppConsole, you should be familiar with the commands.  CppConsole has five simple commands:
-- **reload!** - reloads CppConsole and resets all declared variables and included header files.
+Before starting CppConsole, you should be familiar with the commands.  CppConsole a few simple commands:
 - **#include** - same syntax as C.  This will include the specified header file.
-- **using namespace** - same sytax as C.  This will include the specified namespace.
-- **(Entering a blank line)** - this will attempt to evaluate the last line of C code and print it to the console.
+- **using namespace** - same sytax as C.  This will include the specified namespace.i
+- **static** - same syntax as C.  This will declare static variables and methods.  **All methods defined within CppConsole must be declared as static or you'll recieve a syntax error.
+- **!** - use in place of a semi-colon to force a single execution.  This command cannot be used within methods or if-statements.  However, it can be applied to the end of a large if-statement block.  See the example below for more information about preventing re-execution.
+- **@** - works the same as '!' except it will evaluate the command and print it to the screen.  Some commands cannot be printed, and will not execute if they cannot be printed.  This should be used in place of cout/printf since they can cause re-executed output.i
+- **reload!** - reloads CppConsole and resets all declared variables and included header files.
 - **exit** - This will exit CppConsole.
  
 Everything else will be interpreted as C code and the user will be notified of any syntax errors.  Semi-colons are necessary!
@@ -55,10 +57,10 @@ strftime(buffer,80,"The date is: %B, %d, %Y",now);
 Now we would like to see the contents of buffer.  To print to the screen we can simply type a blank line.  However, the strftime() method returns an integer which we are not interested in.  To get the contents of buffer, enter this:
 
 ```bash
-buffer;
+buffer@
 ```
 
-Press Enter twice.  This should display today's date in the console.
+This should display today's date in the console.
 
 For this example it took more time declaring the variables than it took to execute the desired method.  To speed up this process, CppConsole generates a template that can be modified to include initialization code.  The template name is cpp_console.config, and it is generated in the current working directory each time cppconsole is executed.  We are going to repeat this example by using variables preinitialized by the template.  Quickly exit CppConsole:
 
@@ -98,10 +100,94 @@ The console should be initialized with the contents of the template file.  Now s
 
 ```bash
 strftime(buffer,256,"The date is: %B, %d, %Y",now);
-buffer;
+buffer@
+```
+As you can see, having commonly used headers and variables in the template can save time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help remember them in the future.
+
+Declaring Methods
+=================
+In this example we'll cover adding methods through the console.  The only trick for declaring a method is to remember that they must be static.  Add the following lines in the console:
+
+```bash
+static int s=0;
+
+static string increment(int v, int *p) {
+  s++; v++; *p++;
+  ostringstream s = "Inside the method: s=" << s << " v=" << v << " p=" << *p << "\n";
+  return s.str();
+}
 ```
 
-Press Enter twice.  As you can see, having commonly used headers and variables in the template can save time.  It is a good idea to give the predefined varaiables generic names such as 'now' to help remember them in the future.
+Now that the method had been declared, we can use it inside the code:
+
+```bash
+int v,p;
+string str = increment(v,&p);
+str@
+
+=> Inside the method: s=1 v=1 p=1
+```
+
+We can check the variables after the method and should only expect p and s to be incremented:
+
+```bash
+@v
+
+=>0
+```
+```bash
+@p
+
+=> 1
+```
+```bash
+@s
+
+=> 1
+```
+
+Prevent Re-execution
+====================
+When using CppConsole, it is important to remember that C++ is not a scripting language.  All code typed into the console is stored until reload! is called.  Each successive command will re-execute all the stored code.  Therefore it is important to use reload! when your code is no longer needed.  This next example gives shows you when it is appropriate to use the '!' command.
+
+Open cpp_console.config and add these two methods: 
+
+```bash
+static void append_file(){
+  cout << "Appending to the file.  This should be executed only once!";
+} 
+static void read_file(){
+  cout << "Reading the file... This may be executed multiple times.";
+}
+```
+
+Now start CppConsole and use the append method:
+
+```bash
+cppconsole
+append_file();
+=> Appending to the file.  This should be executed only once!"
+```
+
+Now use the read method:
+
+```bash
+read_file();
+=> Appending to the file.  This should be executed only once!
+=> Reading the file... This may be executed multiple times.
+```
+
+As you can see, the appending to file was executed twice.  This can be prevented with the '!' command.  Reload the console and re-enter the commands:
+
+```bash
+reload!
+append_file()!
+=> Appending to the file.  This should be executed only once!"
+read_file();
+=> Reading the file... This may be executed multiple times.
+```
+
+The '!' command should have prevented the file from being appended to twice.  It is import to remember that '!' should be used whenever entities external to the console code are modified.
 
 Run on Existing Projects
 ========================
@@ -112,8 +198,4 @@ Executing generic code is great, but what if you wanted to tweak some custom cla
 cppconsole <path of project main.cpp> <path of project executable>
 ```
 
-CppConsole assumes that the makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, the #include command should be able to add any of the project's header files.  It would be a good idea to add most of the project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file.  
-
-Limitations
-===========
-Since C++ is not a scripting language, it is important to point out that CppConsole is not dynamically executing each line of code.  In reality, it is recompiling the code each time a new line is entered.  All lines of code are executed on each compile.  Therefore, it is important to type 'reload!' often to clear out old code that is no longer needed.  In addition, if the code communicates with external hardware/software, it can have unreliable results since the external entities may recieve duplicate requests due to re-execution. CppConsole is not intended for all projects, but it can be an excellent development tool when used correctly. 
+CppConsole assumes that the makefile is located in the project's main directory.  If it is located elsewhere, use the -m option to specify the makefile path. Once CppConsole is initialized, the #include command should be able to add any of the project's header files.  It would be a good idea to add most of the project headers into the cpp_console.config file.  Reread the getting started section if you are not familiar with the .config file. For larger projects CppConsole may run slow due to longer compilation times.  To improve performance, you can create custom makefiles to compile subsets of your project.  Just remember to use the -m option to specify the makefile.
