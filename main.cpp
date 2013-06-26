@@ -35,6 +35,7 @@
 using namespace std;
 
 static ostringstream sCodeBuffer; /**< stream used to store user input.*/
+static ostringstream sDumpBuffer; /**< stream used to store the dump list.*/
 
 static const string sApp = "cpp_console"; /**< string of the application name.
                                            * This is used for naming various files that are generated.*/
@@ -217,7 +218,10 @@ int execute(ostringstream* codeStream, bool force_rollback) {
   }
 
   //Rollback if force flag is set, or if compilation failed.
-  if ((force_rollback) || (output != 0)) rollback_file(sMainPath);
+  if ((force_rollback) || (output != 0)) {
+    rollback_file(sMainPath);
+    output=1;
+  }
 
   //Rollback the executable after it is done.  This is to prevent a project
   //executable from getting modified.  This only applies when the console in
@@ -230,6 +234,9 @@ int execute(ostringstream* codeStream, bool force_rollback) {
   sCodeType = MAIN_CODE; //Reset the code type to its default.
   sBraceCount = 0; //Ensure the brace count is zero.  A reload! can force an
   //execution even if the brace count is not zero.
+
+  //Ensure a newline is printed since the output may not have one.
+  cout << "\n";
 
   return output;
 }
@@ -273,7 +280,7 @@ void load_config_template(ostringstream* stream) {
     if (strncmp(ltrim(line).c_str(), sCodeDelimiter[STATIC_CODE].c_str(), sCodeDelimiter[STATIC_CODE].length()) == 0) {
       *stream << "template <typename T> void cpp_console_print(T value){\n";
       *stream << "  stringstream ss;\n";
-      *stream << "  ss << value << \"\\n\";\n";
+      *stream << "  ss << value;\n";
       *stream << "  cout << ss.str();\n";
       *stream << "}\n";
     }
@@ -298,47 +305,35 @@ int reload() {
   ostringstream stream;
   load_config_template(&stream);
 
+  //Reset the dump buffer.
+  sDumpBuffer.str("");
+  sDumpBuffer.clear();
+
   //Execute the stream to verify if the reload was successful.
   return execute(&stream, false);
 }
 
 /**
- * This method prepend the code buffer with the code at the beginning of the
- * file.  Depending on the code type (it could be an include, static method,
- * code in the main method), it effects where the code is inserted.  The
- * sCodeDelimiter is used to determine which part of the file is prepended.
- * @param stream points to the stream that gets the prepended code.
+ * This method populates the merge stream with the contents of the main
+ * cpp file merged with the newly added user input. 
+ * @param merge ptr to the stream that has the merge content between the
+ *              file content and the newly inserted code.
+ * @param code ptr to the code that is to be inserted
  */
-void prepend_code(ostringstream* stream) {
-  //Add the code in the current main file to the stream.
+void insert_code(ostringstream* merge, ostringstream* code) {
+  //Open the current main file.
   ifstream inputFile;
   inputFile.open(sMainPath.c_str());
   string line;
   while (getline(inputFile, line)) {
-    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[sCodeType].c_str(), sCodeDelimiter[sCodeType].length()) == 0) break;
-    *stream << line << "\n";
+    /*Depending on the code type (it could be an include, static method,
+      code in the main method), it effects where the code is inserted.  The
+      sCodeDelimiter is used to determine where the code is inserted.*/
+    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[sCodeType].c_str(), sCodeDelimiter[sCodeType].length()) == 0) 
+      *merge << code->str();
+    *merge << line << "\n";
   }
 
-  inputFile.close();
-}
-
-/**
- * This method appends the code buffer with the code at the end of the
- * file.  Depending on the code type (it could be an include, static method,
- * code in the main method), it effects where the code is inserted.  The
- * sCodeDelimiter is used to determine which part of the file is appended.
- * @param stream points to the stream that gets the appended code.
- */
-void append_code(ostringstream* stream) {
-  //Add the code in the current main file to the stream.
-  ifstream inputFile;
-  inputFile.open(sMainPath.c_str());
-  string line;
-  bool read = false;
-  while (getline(inputFile, line)) {
-    if (strncmp(ltrim(line).c_str(), sCodeDelimiter[sCodeType].c_str(), sCodeDelimiter[sCodeType].length()) == 0) read = true;
-    if (read) *stream << line << "\n";
-  }
   inputFile.close();
 }
 
@@ -347,8 +342,6 @@ void append_code(ostringstream* stream) {
  * @param str the new line of code to add
  */
 void add_code(string str) {
-  if (sCodeBuffer.str() == "") prepend_code(&sCodeBuffer);
-
   //Count the braces and keep track of how deeply they are nested.
   sBraceCount += count(str.begin(), str.end(), '{');
   sBraceCount -= count(str.begin(), str.end(), '}');
@@ -374,8 +367,10 @@ void add_code(string str) {
 
   //If the code is not nested in any braces, we can attempt to execute.
   if (sBraceCount == 0) {
-    append_code(&sCodeBuffer);
-    execute(&sCodeBuffer, force_rollback);
+    ostringstream merge;
+    string dump_string = sCodeBuffer.str();
+    insert_code(&merge,&sCodeBuffer);
+    if (execute(&merge, force_rollback)==0) sDumpBuffer << dump_string;
   }
 }
 
@@ -499,6 +494,8 @@ int main(int argc, char** argv) {
           add_includes(string(input_str));
         } else if (strncmp(input_str, "static ", 7) == 0) {
           add_static_code(string(input_str));
+        } else if (strcmp(input_str, "dump!") == 0) {
+          cout << sDumpBuffer.str();
         } else if (strcmp(input_str, "reload!") == 0) {
           reload();
         } else if (strcmp(input_str, "exit") == 0) {
