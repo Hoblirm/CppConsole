@@ -123,7 +123,7 @@ static string increment(int v, int *p) {
 Now that the method has been declared, we can use it inside the code:
 
 ```bash
-int v,p;
+int v=0, p=0;
 string str = increment(v,&p);
 str@
 => Inside the method: s=1 v=1 p=1
