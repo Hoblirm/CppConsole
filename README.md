@@ -38,7 +38,7 @@ As an example we'll test out the strftime() method in the console.  Before anyth
 cppconsole
 ```
 
-Once CppConsole starts up, we are ready to being the example.  Since we'll be using the strftime() method, we'll need to include the time.h header.  Enter this into the console:
+Once CppConsole starts up, we are ready to begin the example.  Since we'll be using the strftime() method, we'll need to include the time.h header.  Enter this into the console:
 
 ```bash
 #include <time.h>
